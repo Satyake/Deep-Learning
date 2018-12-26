@@ -6,7 +6,7 @@ Created on Tue Dec 25 21:25:26 2018
 @author: satyake
 """
 
-class RBM():
+class RBM(object):
     def __init__(self, nv, nh):
         self.W = torch.randn(nh, nv)
         self.a = torch.randn(1, nh)
