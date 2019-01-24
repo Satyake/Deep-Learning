@@ -1,0 +1,20 @@
+1) Clone or download the complete Yolo project from github repository:
+
+	https://github.com/thtrieu/darkflow 
+
+1) Go to your anaconda environment:
+	
+	pip install Cython
+
+2) Go to the darkflow folder in your anaconda prompt and write:  
+
+	python setup.py build_ext --inplace (to create the build folder)
+
+3) create new folder bin into darkflow folder
+
+4) Download the weights and cfg model from:
+ 
+	https://pjreddie.com/darknet/yolov2/
+
+5) Move yolo weights into the bin folder and Cfg model into cfg folder
+
