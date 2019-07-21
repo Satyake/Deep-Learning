@@ -1,0 +1,69 @@
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
+import torchvision.datasets as dsets
+import torchvision.transforms as transform
+transform=transform.Compose([transform.Resize(28),transform.ToTensor()])
+
+train=dsets.ImageFolder(root='G:/root',transform=transform)
+train_dataloader=torch.utils.data.DataLoader(dataset=train,batch_size=1,shuffle=True)
+test=dsets.ImageFolder(root='G:/test',transform=transform)
+test_dataloader=torch.utils.data.DataLoader(dataset=test,batch_size=1,shuffle=False)
+
+class CNN(nn.Module):
+    def __init__(self):
+        super(CNN,self).__init__()
+        self.conv1=nn.Conv2d(in_channels=3,out_channels=16,kernel_size=5,stride=1, padding=0)
+        self.relu1=nn.ReLU()
+        self.maxpool1=nn.MaxPool2d(kernel_size=2)
+        self.conv2=nn.Conv2d(in_channels=16,out_channels=64,kernel_size=5,stride=1,padding=0)
+        self.relu2=nn.ReLU()
+        self.maxpool2=nn.MaxPool2d(kernel_size=2)
+        self.linear=nn.Linear(4*4*64,3)
+    def forward(self,x):
+        out=self.conv1(x)
+        out=self.relu1(out)
+        out=self.maxpool1(out)
+        out=self.conv2(out)
+        out=self.relu2(out)
+        out=self.maxpool2(out)
+        out=out.view(out.size(0),-1) #size adjustment from (4,4,64,1) to (4*4*64,1)
+        out=self.linear(out)
+        return out
+lr=0.01
+model=CNN()
+optim=torch.optim.SGD(model.parameters(),lr)
+criterion=nn.CrossEntropyLoss()
+correct=0
+total=0
+iter=0
+for e in range(9):
+    e=e+1
+    for i,(images,labels) in enumerate(train_dataloader):
+        images=Variable(images)
+        labels=Variable(labels)
+        optim.zero_grad()
+        output=model(images)
+        loss=criterion(output,labels)
+        loss.backward()
+        optim.step()
+        iter=iter+1
+        if iter%400==0:
+         for images,labels in test_dataloader:
+             images=Variable(images)
+             labels=Variable(labels)
+             out=model(images)
+             _,pred=torch.max(out.data,1)
+             total+=len(labels)
+             correct+=(pred==labels).sum()
+         accuracy=100*(correct/total)
+         print('epochs{},loss{},accuracy{}'.format(e,loss.item(),accuracy))
+            
+from PIL import Image
+UK=Image.open('G:/airplane.JPEG')
+UK=transform(UK)
+UK=UK.unsqueeze(0)
+model.eval()
+test_out=model(UK)
+_,UK_pred=torch.max(test_out.data,1)
+print('classes',test.classes[UK_pred[0]])
